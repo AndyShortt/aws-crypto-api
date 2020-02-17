@@ -1,0 +1,21 @@
+StorageBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: "StorageBucket"
+      PolicyDocument:
+        Statement:
+        -
+          Action:
+            - "s3:GetObject"
+            - "s3:PutObject"
+          Effect: "Allow"
+          Resource:
+            Fn::Join:
+              - ""
+              -
+                - "arn:aws:s3:::"
+                -
+                  Ref: "StorageBucket"
+                - "/*"
+          Principal: '*'
