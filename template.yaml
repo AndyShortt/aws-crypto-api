@@ -2,7 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 15
+Parameters:
+  WestKey:
+    Type: 'String'
 Resources:
   CryptoAPIFunction:
     Type: AWS::Serverless::Function
@@ -13,20 +16,90 @@ Resources:
       Environment:
         Variables:
           KMS_EAST_CMK: !GetAtt EastKey.Arn
-          KMS_WEST_CMK: arn:aws:kms:us-west-2:313021996969:key/e99c0af6-77f3-4079-b706-90386a77d35e
+          KMS_WEST_CMK: !Ref WestKey
           S3_BUCKET: !Ref StorageBucket
           S3_OBJECT_KEY: encrypted_data.txt
-
       Events:
         API:
           Type: Api
           Properties:
             Path: /encryptdecrypt
             Method: any
-  
+      Role: !GetAtt CryptoAPIFunctionRole.Arn
+
+  CryptoAPIFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: kms
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'kms:GenerateDataKey'
+                  - 'kms:GenerateDataKeyWithoutPlaintext'
+                  - 'kms:Encrypt'
+                  - 'kms:Decrypt'
+                Resource:
+                  - !GetAtt EastKey.Arn
+                  - !Ref WestKey
+        - PolicyName: s3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource: 
+                  Fn::Join: 
+                    - ""
+                    - 
+                      - "arn:aws:s3:::"
+                      - !Ref StorageBucket
+                      - "/*"
+
   StorageBucket:
     Type: AWS::S3::Bucket
-
+  StorageBucketPolicy: 
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref StorageBucket
+      PolicyDocument: 
+        Statement: 
+          - 
+            Action: 
+              - "s3:GetObject"
+              - "s3:PutObject"
+            Effect: "Allow"
+            Resource: 
+              Fn::Join: 
+                - ""
+                - 
+                  - "arn:aws:s3:::"
+                  - !Ref StorageBucket
+                  - "/*"
+            Principal:
+              AWS:
+                Fn::Join:
+                - ''
+                - - 'arn:aws:iam::'
+                  - Ref: AWS::AccountId
+                  - :root      
+         
   EastKey:
     Type: AWS::KMS::Key
     Properties:

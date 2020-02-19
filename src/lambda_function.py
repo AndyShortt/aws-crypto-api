@@ -29,7 +29,7 @@ encrypt_decrypt = CryptoHandler(key_id_east, key_id_west)
 s3_utility = S3Utils()
 
 def lambda_handler(event, context):
-    print(json.dumps(event))
+    #print(json.dumps(event))
     
     if event['httpMethod'] == 'PUT':
         return respond(None, encrypt_and_put(json.loads(event['body'])))
@@ -49,7 +49,7 @@ def encrypt_and_put(plaintext):
 
 
 def decrypt_and_get(decrypt):
-    print(decrypt)
+
     ciphertext = s3_utility.s3_get(s3_bucket, s3_object_key)
     plaintext = ciphertext
     
