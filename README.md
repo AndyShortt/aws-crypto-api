@@ -46,7 +46,7 @@ You should be ready to hit the API with some text and then pull it back either u
 
 1. Replace the url below with the API from your deployment, then execute the below curl command (feel free to change the data being sent over):
 
-$ curl -i --location --request PUT \
+$ curl -i --location --request PUT \  
 'https://xyz.execute-api.region-code.amazonaws.com/Prod/encryptdecrypt/' \
 --data-raw '{"Secret":"Plaintext"}'
 
