@@ -51,12 +51,14 @@ def encrypt_and_put(plaintext):
 def decrypt_and_get(decrypt):
 
     ciphertext = s3_utility.s3_get(s3_bucket, s3_object_key)
-    plaintext = ciphertext
     
     if decrypt == 'YES' and decrypt is not None:
         plaintext = encrypt_decrypt.decrypt(ciphertext)
+        returntext = plaintext
+    else:
+        returntext = ciphertext
     
-    return plaintext
+    return returntext
 
 
 def respond(err, res=None):

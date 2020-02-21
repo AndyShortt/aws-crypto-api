@@ -28,6 +28,5 @@ class S3Utils(object):
 
     def s3_get(self,bucket, object_key):
         response = s3.get_object(Bucket=bucket, Key=object_key)
-        #print(json.dumps(response['Body'].read().decode('utf-8')))
         return (json.dumps(response['Body'].read().decode('utf-8')))
     
