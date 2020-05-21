@@ -12,7 +12,7 @@ Speaker information and abstract [here](https://cybersecuritysymposium.uncc.edu/
 
 ## License Summary
 This sample code is made available under the MIT-0 license. See the LICENSE file.  
-Amazon Employees, see ticket XXXXXXXX for open source approval.
+Amazon Employees, see ticket V179938618 for open source approval.
 
 
 ## Deployment
