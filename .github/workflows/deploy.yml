@@ -22,11 +22,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Place honeypot decoy
-        uses: AndyShortt/woozle-trap/action@main
-        with:
-          backend-url: ${{ vars.HONEYPOT_BACKEND_URL }}
-          api-key: ${{ secrets.HONEYPOT_BACKEND_API_KEY }}
-          path-prefix: src
+        env:
+          BACKEND_URL: ${{ vars.HONEYPOT_BACKEND_URL }}
+          BACKEND_API_KEY: ${{ secrets.HONEYPOT_BACKEND_API_KEY }}
+          PATH_PREFIX: src
+        run: python3 .github/scripts/place_honeypot_decoy.py
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
