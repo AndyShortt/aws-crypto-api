@@ -16,10 +16,9 @@ class CryptoHandler(object):
     
     def construct_multiregion_kms_master_key_provider(self, key_id_east, key_id_west):
 
-        kms_master_key_provider = aws_encryption_sdk.StrictAwsKmsMasterKeyProvider()
-        kms_master_key_provider.add_master_key(key_id_west)
-        kms_master_key_provider.add_master_key(key_id_east)
-        
+        kms_master_key_provider = aws_encryption_sdk.StrictAwsKmsMasterKeyProvider(
+            key_ids=[key_id_west, key_id_east])
+
         return kms_master_key_provider
 
     def encrypt(self, data):
