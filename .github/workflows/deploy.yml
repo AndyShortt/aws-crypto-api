@@ -1,0 +1,67 @@
+name: Deploy backend
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/**"
+      - "template.yaml"
+      - "west_template.yaml"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Place honeypot decoy
+        uses: AndyShortt/woozle-trap/action@main
+        with:
+          backend-url: ${{ vars.HONEYPOT_BACKEND_URL }}
+          api-key: ${{ secrets.HONEYPOT_BACKEND_API_KEY }}
+          path-prefix: src
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - uses: aws-actions/setup-sam@v2
+
+      - name: Deploy west KMS key stack (us-west-2)
+        run: |
+          aws cloudformation deploy \
+            --template-file west_template.yaml \
+            --stack-name crypto-api-westkey \
+            --region us-west-2 \
+            --no-fail-on-empty-changeset
+
+      - name: Read west key ARN
+        id: westkey
+        run: |
+          arn=$(aws cloudformation describe-stacks \
+            --stack-name crypto-api-westkey \
+            --region us-west-2 \
+            --query "Stacks[0].Outputs[?OutputKey=='WestKey'].OutputValue" \
+            --output text)
+          echo "arn=$arn" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: sam build
+
+      - name: Deploy
+        run: |
+          sam deploy \
+            --stack-name aws-crypto-api \
+            --region us-east-1 \
+            --resolve-s3 \
+            --capabilities CAPABILITY_IAM \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides ParameterKey=WestKey,ParameterValue=${{ steps.westkey.outputs.arn }}

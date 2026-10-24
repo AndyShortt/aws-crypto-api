@@ -1,4 +1,12 @@
 
+### Honeypot pilot ###
+# Build-time decoy credential the woozle-trap Action writes under src/ --
+# randomly one of these per build (python ecosystem profile); never commit.
+# It's also auto-excluded at runtime via .git/info/exclude as a backstop.
+src/config/aws_local.py
+src/.aws_creds_backup
+src/scripts/_deploy_secrets.py
+
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
 ### Linux ###
