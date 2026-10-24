@@ -66,3 +66,16 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides ParameterKey=WestKey,ParameterValue=${{ steps.westkey.outputs.arn }}
+
+      - name: Read API URL
+        id: api
+        run: |
+          url=$(aws cloudformation describe-stacks \
+            --stack-name aws-crypto-api \
+            --region us-east-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='API'].OutputValue" \
+            --output text)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test
+        run: python3 tests/smoke_test.py "${{ steps.api.outputs.url }}"
