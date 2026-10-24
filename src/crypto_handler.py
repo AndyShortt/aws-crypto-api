@@ -16,7 +16,7 @@ class CryptoHandler(object):
     
     def construct_multiregion_kms_master_key_provider(self, key_id_east, key_id_west):
 
-        kms_master_key_provider = aws_encryption_sdk.KMSMasterKeyProvider()
+        kms_master_key_provider = aws_encryption_sdk.StrictAwsKmsMasterKeyProvider()
         kms_master_key_provider.add_master_key(key_id_west)
         kms_master_key_provider.add_master_key(key_id_east)
         
@@ -24,7 +24,7 @@ class CryptoHandler(object):
 
     def encrypt(self, data):
 
-        ciphertext, _header = aws_encryption_sdk.encrypt(
+        ciphertext, _header = aws_encryption_sdk.EncryptionSDKClient().encrypt(
          source=json.dumps(data),
          key_provider=self.master_key_provider)
         
@@ -34,7 +34,7 @@ class CryptoHandler(object):
     def decrypt(self, data):
 
         ciphertext = base64.b64decode(data)
-        plaintext, header = aws_encryption_sdk.decrypt(
+        plaintext, header = aws_encryption_sdk.EncryptionSDKClient().decrypt(
          source=ciphertext,
          key_provider=self.master_key_provider)
         
